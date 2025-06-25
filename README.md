@@ -23,8 +23,8 @@ Sample data was added for demonstration. The actual workflow will log real rainy
 ## 🛠 Setup
 
 1. Import the JSON file into n8n
-2. Replace the OpenWeatherMap API key
-3. Configure your Gmail SMTP or app password
+2. Replace the placeholder "appid": "PASTE_YOUR_API_KEY_HERE" with your actual OpenWeatherMap API key.
+3. In the Gmail node, update the "sendTo" field from some@email.com to your real recipient email.
 4. Set your Google Sheets credentials
 5. Trigger manually or let it run daily via Cron
 
