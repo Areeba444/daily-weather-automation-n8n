@@ -1,0 +1,332 @@
+{
+  "name": "Daily Weather Notification via Email",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -220,
+        -20
+      ],
+      "id": "bc24cd6b-9367-4e1c-8ed5-982cbfd23449",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://api.openweathermap.org/data/2.5/weather",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "Islamabad"
+            },
+            {
+              "name": "units",
+              "value": "metric"
+            },
+            {
+              "name": "appid",
+              "value": "04e72a13814ca08c9fa2eec427eafd4b"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        -20
+      ],
+      "id": "e95fbe2e-db4c-45d7-9b85-272a6e45e138",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "58b0fd1a-66b1-4f62-90a3-8b09d0763158",
+              "name": "subject",
+              "value": "=Daily Weather Report - {{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "962fdec7-8b81-4f2e-adb6-22452deeb69b",
+              "name": "body",
+              "value": "=Good morning! Here's the latest weather report for {{ $json.name }}, {{ $json.sys.country }} 🌍:\n\n🌡️ Temperature: {{ $json.main.temp }}°C  \n🤒 Feels Like: {{ $json.main.feels_like }}°C  \n📉 Min: {{ $json.main.temp_min }}°C | 📈 Max: {{ $json.main.temp_max }}°C  \n💧 Humidity: {{ $json.main.humidity }}%  \n🔵 Pressure: {{ $json.main.pressure }} hPa  \n🌬 Wind: {{ $json.wind.speed }} m/s, Gusts: {{ $json.wind.gust }} m/s  \n☁️ Sky: {{ $json.weather[0].description }}  \n🌅 Sunrise: {{ new Date(($json.sys.sunrise + $json.timezone) * 1000).toLocaleTimeString(\"en-US\", { hour: \"2-digit\", minute: \"2-digit\" }) }}\n🌇 Sunset: {{ new Date(($json.sys.sunset + $json.timezone) * 1000).toLocaleTimeString(\"en-US\", { hour: \"2-digit\", minute: \"2-digit\" }) }}\n\n\n\nHave a great day! ☀️\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        440,
+        -20
+      ],
+      "id": "fd05d051-837b-46ef-a9e0-6ab0d93f4713",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "sendTo": "areebajd495@gmail.com",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.body }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        660,
+        -20
+      ],
+      "id": "b1f3582c-c49c-4250-b135-11e38f51d573",
+      "name": "Gmail",
+      "webhookId": "d159ea28-7280-4034-af79-ae65ab8dc8e6",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Q1og1AVVok4l08z6",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1DjasYNq8zgI2YEhvVxgGhtjOtmb9JrbCChQdREirGBk",
+          "mode": "list",
+          "cachedResultName": "Raining Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DjasYNq8zgI2YEhvVxgGhtjOtmb9JrbCChQdREirGBk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DjasYNq8zgI2YEhvVxgGhtjOtmb9JrbCChQdREirGBk/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ new Date().toLocaleDateString() }}",
+            "Time": "={{ new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) }}",
+            "City": "={{ $json.name }}",
+            "Condition": "={{ $json.weather[0].main }}",
+            "Description": "={{ $json.weather[0].description }}",
+            "Temperature": "={{ $json.main.temp }}",
+            "Temperature (°C)": "={{ $json.clouds.all }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Time",
+              "displayName": "Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "City",
+              "displayName": "City",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Condition",
+              "displayName": "Condition",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Temperature",
+              "displayName": "Temperature",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Temperature (°C)",
+              "displayName": "Temperature (°C)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        440,
+        -200
+      ],
+      "id": "338e86b8-3e08-4301-8d65-48eb303a3f4e",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "nOY2hF1Cx2oESX4F",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "86776974-048b-4ec0-9516-3d428c2c931b",
+              "leftValue": "={{ $json.weather[0].main }}",
+              "rightValue": "={{ \"drizzle\" }} or {{\"thunderstorm\"}} or {{ \"rain\" }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        220,
+        -20
+      ],
+      "id": "34e6bb84-258b-4abb-b450-61723592c973",
+      "name": "If"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        []
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a68ac520-0304-4964-b5ae-f3d3b4de28ba",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "aeb2899a23873a4fc34caa43121a5d43afe3e79e75386f41de4f2ecf2315e26e"
+  },
+  "id": "SpbL4R9sNcwZZhcc",
+  "tags": []
+}
